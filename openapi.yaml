@@ -28,6 +28,8 @@ paths:
             examples:
               newPost:
                 $ref: "#/components/examples/NewPost"
+              urlOnly:
+                $ref: "#/components/examples/UrlOnly"
       responses:
         "200":
           description: Notification sent
@@ -37,7 +39,7 @@ paths:
                 type: string
                 const: ok
         "400":
-          description: Body is not valid JSON
+          description: Body is not a valid JSON object
           content:
             text/plain:
               schema:
@@ -64,12 +66,17 @@ components:
       properties:
         title:
           type: string
-          description: Post title. Used as the first line of the notification.
-          default: New post
+          description: >
+            Optional post title, used as the first line of the notification. If
+            omitted or empty, the title is read from the page at `url` (og:title,
+            then <title>; for single-page apps that serve a generic shell, the
+            post's <h1> from its JS chunk), falling back to "New post".
         url:
           type: string
           format: uri
-          description: Link to the post. Used as the second line of the notification.
+          description: >
+            Link to the post. Used as the second line of the notification, and to
+            look up the title when none is given.
           default: ""
 
   examples:
@@ -78,3 +85,7 @@ components:
       value:
         title: My new post
         url: https://example.com/my-new-post
+    UrlOnly:
+      summary: Let the title be read from the page
+      value:
+        url: https://chris-messer.com/writing/build-dumb-things

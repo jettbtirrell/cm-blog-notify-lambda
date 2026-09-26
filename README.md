@@ -15,11 +15,30 @@ curl -X POST "<FUNCTION_URL>" \
   -d @examples/notify-request.json
 ```
 
+Both fields are optional. Just sending the link works too; the title is looked up from the page:
+
+```bash
+curl -X POST "<FUNCTION_URL>" \
+  -H "Content-Type: application/json" \
+  -H "x-webhook-secret: <SECRET>" \
+  -d '{"url": "https://chris-messer.com/writing/build-dumb-things"}'
+```
+
 | Response | Meaning |
 | --- | --- |
 | `200 ok` | Notification sent |
 | `401 unauthorized` | Missing or wrong secret |
-| `400 invalid json` | Body isn't valid JSON |
+| `400 invalid json` | Body isn't a valid JSON object |
+
+## Title lookup
+
+If `title` is missing or empty, the function fetches `url` and uses, in order:
+
+1. The page's `og:title`, then its `<title>`
+2. If those tags describe a different page (their `og:url` doesn't match), the page is a single-page-app shell, as on chris-messer.com. The function then finds the post's JS chunk by slug (`build-dumb-things` → `BuildDumbThings-*.js`) and uses the `<h1>` from the article HTML inside it.
+3. `"New post"` if nothing works
+
+Step 2 depends on how that site is built, so it may need updating if the site changes. The lookup also collects the article text, ready for storing later.
 
 ## Project layout
 
