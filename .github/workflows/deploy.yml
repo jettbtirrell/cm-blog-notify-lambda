@@ -1,0 +1,51 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/**
+      - template.yaml
+      - .github/workflows/deploy.yml
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency: deploy
+
+env:
+  AWS_REGION: us-east-1
+  STACK_NAME: blog-notify
+  ARTIFACT_BUCKET: cm-blog-notify-artifacts
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package
+        run: |
+          aws cloudformation package \
+            --template-file template.yaml \
+            --s3-bucket "$ARTIFACT_BUCKET" \
+            --output-template-file packaged.yaml
+
+      - name: Deploy
+        env:
+          PHONE_NUMBER: ${{ secrets.PHONE_NUMBER }}
+          EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+        run: |
+          aws cloudformation deploy \
+            --template-file packaged.yaml \
+            --stack-name "$STACK_NAME" \
+            --capabilities CAPABILITY_IAM \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides "PhoneNumber=$PHONE_NUMBER" "EmailAddress=$EMAIL_ADDRESS"
