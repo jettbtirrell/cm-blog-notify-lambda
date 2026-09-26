@@ -85,6 +85,14 @@ Resources:
       Principal: "*"
       FunctionUrlAuthType: NONE
 
+  PublicInvokeViaUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref NotifyFunction
+      Action: lambda:InvokeFunction
+      Principal: "*"
+      InvokedViaFunctionUrl: true
+
 Outputs:
   FunctionUrl:
     Value: !GetAtt NotifyFunctionUrl.FunctionUrl
