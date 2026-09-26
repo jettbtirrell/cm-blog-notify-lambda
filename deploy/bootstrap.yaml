@@ -6,7 +6,8 @@ Description: >
 Parameters:
   GitHubRepo:
     Type: String
-    Default: jettbtirrell/cm-blog-notify-lambda
+    Default: jettbtirrell@110650032/cm-blog-notify-lambda@1389574812
+    Description: Immutable owner@id/repo@id form used in the OIDC sub claim
 
   ArtifactBucket:
     Type: String
