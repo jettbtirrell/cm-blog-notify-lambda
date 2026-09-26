@@ -152,8 +152,12 @@ def handler(event, context):
     if not isinstance(body, dict):
         return {"statusCode": 400, "body": "invalid json"}
 
-    url = body.get("url", "")
-    metadata = fetch_page_metadata(url) if url and not body.get("title") else {}
+    url = body.get("url")
+    if not isinstance(url, str) or not url.strip():
+        return {"statusCode": 400, "body": "missing url"}
+    url = url.strip()
+
+    metadata = fetch_page_metadata(url) if not body.get("title") else {}
     title = body.get("title") or metadata.get("title") or "New post"
 
     sns.publish(

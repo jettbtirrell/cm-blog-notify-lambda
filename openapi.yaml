@@ -20,7 +20,7 @@ paths:
       operationId: notifyNewPost
       summary: Notify subscribers about a new post
       requestBody:
-        required: false
+        required: true
         content:
           application/json:
             schema:
@@ -39,12 +39,14 @@ paths:
                 type: string
                 const: ok
         "400":
-          description: Body is not a valid JSON object
+          description: Body is not a valid JSON object, or `url` is missing or empty
           content:
             text/plain:
               schema:
                 type: string
-                const: invalid json
+                enum:
+                  - invalid json
+                  - missing url
         "401":
           description: Missing or wrong x-webhook-secret header
           content:
@@ -63,6 +65,8 @@ components:
   schemas:
     NotifyRequest:
       type: object
+      required:
+        - url
       properties:
         title:
           type: string
@@ -74,10 +78,10 @@ components:
         url:
           type: string
           format: uri
+          minLength: 1
           description: >
-            Link to the post. Used as the second line of the notification, and to
-            look up the title when none is given.
-          default: ""
+            Required link to the post. Used as the second line of the notification,
+            and to look up the title when none is given.
 
   examples:
     NewPost:

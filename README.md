@@ -15,7 +15,7 @@ curl -X POST "<FUNCTION_URL>" \
   -d @examples/notify-request.json
 ```
 
-Both fields are optional. Just sending the link works too; the title is looked up from the page:
+`url` is required; `title` is optional. Sending just the link works, and the title is looked up from the page:
 
 ```bash
 curl -X POST "<FUNCTION_URL>" \
@@ -29,6 +29,7 @@ curl -X POST "<FUNCTION_URL>" \
 | `200 ok` | Notification sent |
 | `401 unauthorized` | Missing or wrong secret |
 | `400 invalid json` | Body isn't a valid JSON object |
+| `400 missing url` | `url` is missing or empty; nothing is sent |
 
 ## Title lookup
 
