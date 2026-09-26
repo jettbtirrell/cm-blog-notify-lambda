@@ -1,0 +1,80 @@
+openapi: 3.1.0
+info:
+  title: Blog publish notifier
+  version: 1.0.0
+  description: Webhook that sends a notification when a new blog post is published.
+
+servers:
+  - url: "{functionUrl}"
+    variables:
+      functionUrl:
+        default: https://example.lambda-url.us-east-1.on.aws
+        description: The Lambda function URL (shared privately)
+
+security:
+  - webhookSecret: []
+
+paths:
+  /:
+    post:
+      operationId: notifyNewPost
+      summary: Notify subscribers about a new post
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotifyRequest"
+            examples:
+              newPost:
+                $ref: "#/components/examples/NewPost"
+      responses:
+        "200":
+          description: Notification sent
+          content:
+            text/plain:
+              schema:
+                type: string
+                const: ok
+        "400":
+          description: Body is not valid JSON
+          content:
+            text/plain:
+              schema:
+                type: string
+                const: invalid json
+        "401":
+          description: Missing or wrong x-webhook-secret header
+          content:
+            text/plain:
+              schema:
+                type: string
+                const: unauthorized
+
+components:
+  securitySchemes:
+    webhookSecret:
+      type: apiKey
+      in: header
+      name: x-webhook-secret
+
+  schemas:
+    NotifyRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Post title. Used as the first line of the notification.
+          default: New post
+        url:
+          type: string
+          format: uri
+          description: Link to the post. Used as the second line of the notification.
+          default: ""
+
+  examples:
+    NewPost:
+      summary: A newly published post
+      value:
+        title: My new post
+        url: https://example.com/my-new-post
